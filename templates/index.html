@@ -1,0 +1,131 @@
+<html>
+<head>
+	<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+</head>
+<body>
+	<div id="login_form" class="login-container" style="">
+	  <section class="login" id="login">
+	    <header>
+	      <h2>Donate Login</h2>
+	    </header>
+	    <form class="login-form" action="#" method="post">
+	      <input type="text" id="log_userid" class="login-input" placeholder="User" required autofocus/>
+	      <input type="password" id="log_userpw" class="login-input" placeholder="Password" required/>
+	      <div class="submit-container">
+	        <button type="button" class="login-button" onclick="ONlogin()">SIGN IN</button>
+	        <button type="button" class="login-button" onclick="show_reg()">SIGN UP</button>
+	      </div>
+	    </form>
+	  </section>
+	  <p>2016 - <a href="https://www.twitter.com/isacfadoni">Isac Fadoni</a></p>
+	</div>
+
+	<div id="reg_form" class="login-container" style="display:none">
+	  <section class="login" id="login">
+	    <header>
+	      <h2>Donate Register</h2>
+	    </header>
+	    <form class="login-form" action="#" method="post" >
+	      <input type="text" id="reg_userid" class="login-input" placeholder="User" required autofocus/>
+	      <input type="password" id="reg_userpw" class="login-input" placeholder="Password" required/>
+	      <div class="submit-container">
+	        <button type="button" class="login-button" onclick="ONreg()">SIGN IN</button>
+	        <button type="button" class="login-button" onclick="show_log()">EXIT</button>
+	      </div>
+	    </form>
+	  </section>
+	  <p>2016 - <a href="https://www.twitter.com/isacfadoni">Isac Fadoni</a></p>
+	</div>
+
+	<script>
+		var form = document.getElementById('login');
+		var buttonE1 = document.getElementById('e1');
+
+		buttonE1.addEventListener('click', function () {
+		  form.classList.add('error_1');
+		  setTimeout(function () {
+		    form.classList.remove('error_1');
+		  }, 3000);
+		});
+
+		function ONlogin() {
+			var obj = new Object();
+			obj.userid = $('input#log_userid').val();
+			obj.userpw = $('input#log_userpw').val();
+			var jsonData = JSON.stringify(obj);
+			$.ajax({
+				url: "/login",
+				type: "post",
+				accept: "application/json",
+				contentType: "application/json; charset=utf-8",
+				data: jsonData,
+				dataType: "json",
+				success: function(data) {
+					if(data.result == 'fail') {
+						alert('Login Failed');
+					}
+					else if(data.result == 'loginok')
+					{
+						{% if room is not none %}
+						window.location.href = '/donate/{{roomid}}';
+						{% else %}
+						window.location.href = '/donate';
+						{% endif %}
+					}
+				},
+				error: function(xhr, status, error) {
+					console.log(error);
+				}
+			});
+		}
+
+		function ONreg() {
+			var obj = new Object();
+			obj.userid = $('input#reg_userid').val();
+			obj.userpw = $('input#reg_userpw').val();
+			var jsonData = JSON.stringify(obj);
+			$.ajax({
+				url: "/register",
+				type: "post",
+				accept: "application/json",
+				contentType: "application/json; charset=utf-8",
+				data: jsonData,
+				dataType: "json",
+				success: function(data) {
+					if(data.result == 'duplicate') {
+						alert('Id is duplicate');
+					}
+					else if(data.result == 'error')
+					{
+						alert('Register Error');
+					}
+					else if(data.result == 'success')
+					{
+						alert('Hello!');
+						show_log();
+					}
+				},
+				error: function(xhr, status, error) {
+					console.log(error);
+				}
+			});
+		}
+		function show_reg() {
+			$("#login_form").fadeOut(300);
+			setTimeout(function() {
+				$("#reg_form").fadeIn(0);
+			}, 300);
+		}
+
+		function show_log() {
+			$("#reg_form").fadeOut(300);
+			setTimeout(function() {
+				$("#login_form").fadeIn(0);
+			}, 300);
+		}
+	</script>
+</body>
+</html>

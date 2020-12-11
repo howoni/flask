@@ -1,0 +1,93 @@
+<html>
+<head>
+	<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/user.css') }}" />
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <a href="/" class="navbar-brand">Home</a>
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav">
+                <a href="/user" class="nav-item nav-link">:D</a>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <h6 style="color:white;">보유금 : {{money}}</h6>
+            </div>
+        </div>
+    </nav>
+	<div class="container">
+		<div id="main" class="main">
+			<div class="item1" id="item1"></div>
+			<div class="item2" id="item2">
+				<section class="donation-image" style="text-align:center"> 
+					<img id="current-img" src="{{ img | default(url_for('static', filename='picture/blank.png')) }}" style="border:1px solid; width:24rem; height:16rem;"><br />
+					<form id="upload-form" methods="post" enctype="multipart/form-data">
+						<input id="change-image" type="file" onchange="previewFile()">
+					</form>
+				</section>
+				<section class="donation-data">
+					<span> 사용자명: $user$ 금액 : $money$ </span><br />
+					<textarea id="data" cols="100%" rows="4" values="">{{content|default('')}}</textarea><br />
+					<span> 기부 최소 금액 </span><br />
+					<input id="limit" type="number" value="{{limit|default('0')}}">
+				</section>
+				<section class="submit-zone">
+					<input type="button" value="완료" onclick="upload_config()" style="width:100%">
+				</section>
+			</div>	
+			<div class="item3" id="item3"></div>
+			<input type="hidden" id="user_id" value="{{user_id}}">
+		</div>
+	</div>
+
+	<script>
+		function previewFile() {
+			var file    = document.getElementById('change-image').files[0];
+			var reader  = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = function () {
+				document.getElementById('current-img').src = reader.result;
+			}
+		}
+
+		function upload_config() {
+			var obj = new Object();
+			obj.img = document.getElementById('current-img').src
+			obj.content = $('textarea#data').val();
+			obj.user_id = $('input#user_id').val();
+			obj.limit = $('input#limit').val();
+
+			var jsonData = JSON.stringify(obj);
+			$.ajax({
+				url: "/user/uploadconfig",
+				type: "post",
+				accept: "application/json",
+				contentType: "application/json; charset=utf-8",
+				data: jsonData,
+				dataType: "json",
+				success: function(data) {
+					if (data.result == 'bad')
+					{
+						alert('나쁜시도');
+						location.reload(true);
+					}
+					else if(data.result == 'good')
+					{
+						alert('ok!');
+						location.reload(true);
+					}
+					console.log('');
+				},
+				error: function(xhr, status, error) {
+					console.log(error);
+				}
+			});
+		}
+	</script>
+</body>
+</html>

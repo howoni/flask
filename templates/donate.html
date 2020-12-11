@@ -1,0 +1,126 @@
+<html>
+<head>
+	<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/donate.css') }}" />
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <a href="/" class="navbar-brand">Home</a>
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav">
+                <a href="/user" class="nav-item nav-link">:D</a>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <h6 style="color:white;">보유금 : {{money}}</h6>
+            </div>
+        </div>
+    </nav>
+	{% if room is not none %}
+	<div class="container">
+		<div id="main" class="donate">
+			<div class="item1" id="item1"></div>
+			<div class="item2" id="item2">
+				<section>
+					<h3> {{room}} 에게 얼마를 기부할 것인가요? </h3> 
+				</section>
+				<section class="top">
+					<label class="name">
+						<span> 이름 </span>
+						<input type="text" id="sender" value="{{userid}}">
+					</label>
+					<label class="money">
+						<span> 금액 </span>
+						<input type="text" id="money" value="{{limit|default('0')}}">
+					</label>
+				</section>
+				<section class="bottom">
+					<span> 내용 </span> <br />
+					<textarea id="data" cols="100%" rows="4" values="안녕하세요!"></textarea> <br />
+				</section>
+				<section class="dosubmit" align="right">
+					<input type="button" value="전송" onclick="Onsubmit()">
+				</section>
+			</div>	
+			<div class="item3" id="item3">
+				
+			</div>
+		</div>
+	</div>
+	{% else %}
+	<div class="container">
+		<button value="1000원" onclick="money()">T.T</button>
+	</div>
+	{% endif %}
+	<script>
+		function Onsubmit() {
+			var obj = new Object();
+			obj.sender = $('input#sender').val();
+			obj.room = $('input#room').val();
+			obj.money = $('input#money').val();
+			obj.data = $('textarea#data').val();
+			var jsonData = JSON.stringify(obj);
+			$.ajax({
+				url: "/donate/{{room|default('')}}",
+				type: "post",
+				accept: "application/json",
+				contentType: "application/json; charset=utf-8",
+				data: jsonData,
+				dataType: "json",
+				success: function(data) {
+					if (data.result == 'nomoney')
+					{
+						alert('돈이 없서요');
+					}
+					else if(data.result == 'success')
+					{
+						alert('ok!');
+						location.reload(true);
+					}
+					else if(data.result == 'bad')
+					{
+						location.reload(true);
+					}
+					else
+					{
+						alert(data.result+' 단위로 올려주세용')
+					}
+					console.log('');
+				},
+				error: function(xhr, status, error) {
+					console.log(error);
+				}
+			});
+		}
+
+		function money() {
+				$.ajax({
+				url: "/ineedmoney",
+				type: "post",
+				accept: "application/json",
+				contentType: "application/json; charset=utf-8",
+				success: function(data) {
+					if (data.result == 'good')
+					{
+						alert('poor...');
+						location.reload(true);
+					}
+					else
+					{
+						window.location.href = '/';
+					}
+				},
+				error: function(xhr, status, error) {
+					console.log(error);
+				}
+			});
+		}
+	</script>
+</body>
+</html>
+
+
