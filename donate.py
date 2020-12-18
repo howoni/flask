@@ -112,17 +112,18 @@ def donate(room):
 	if request.method == 'GET':
 		if 'userid' in session:
 			userid = escape(session['userid'])
-			sql = 'select * from user_sender where id = ?'
+			sql = 'select id, config from user_sender where id = ?'
 			r = query_db(sql, (room,))
-			sql = 'select money, id, config from user_sender where id= ? limit 1'
+			sql = 'select money, id from user_sender where id= ? limit 1'
 			r2 = query_db(sql, (userid,))
 			try:
 				if r[0][0] is not None:
-					limit = json.loads(r2[0][2])['limit']
+					limit = json.loads(r[0][1])['limit']
 					pass
 				else:
 					return render_template('donate.html', userid=userid,room=None,money=r2[0][0])
-			except:
+			except Exception as e:
+				print(e)
 				return render_template('donate.html', userid=userid,room=None,money=r2[0][0])
 
 			return render_template('donate.html', userid=userid,room=room,money=r2[0][0], limit=limit)
@@ -180,8 +181,8 @@ def user():
 		userid = escape(session['userid'])
 		sql = 'select money,config from user_sender where id= ? limit 1'
 		r = query_db(sql, (userid,))
-		config = json.loads(r[0][1])
 		try:
+			config = json.loads(r[0][1])
 			print(config, file=sys.stdout)
 			return render_template('user.html', money=r[0][0], user_id=userid, img=config['img'], content=config['content'] , limit=config['limit'])
 		except:
